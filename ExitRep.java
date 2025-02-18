@@ -53,6 +53,7 @@ public class ExitRep {
             break;
     }
 }
+    //for demo only, void for real implications
     System.out.println("");
     System.out.println("\rHome: Functions");
     System.out.println("(1)log");
