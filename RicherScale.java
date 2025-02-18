@@ -24,9 +24,9 @@ public class RicherScale {
         String confirm = sc.next().toLowerCase();
     if(confirm.equals("y")){
         System.out.println("input magnitude: ");
-        double MAG = sc.nextInt();
+        double MAG = sc.nextDouble();
         System.out.println("calculateing...");
-        Thread.sleep(200);
+        Thread.sleep(2000);
         System.out.println(player.RicherScaleEN(MAG, ""));
     }
     else{
