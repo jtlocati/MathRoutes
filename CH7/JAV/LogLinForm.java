@@ -1,3 +1,4 @@
+package CH7.JAV;
 import java.util.Scanner;
 public class LogLinForm{
     public String LogTOling(String equastion, String ret){
