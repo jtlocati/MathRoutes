@@ -1,7 +1,5 @@
-   
 import math
-
-
+#balls
 def gcd(a, b):
     a = abs(int(a)); b = abs(int(b))
     while b:
@@ -19,43 +17,38 @@ def reduce_frac(n, d):
         d = -d
     return (n, d)
 
+# TI-84 Python does NOT support math.isqrt(), so we use sqrt-based integer check
 def is_square(n):
-    if n < 0: return False
-    r = int(math.isqrt(n))
-    return r*r == n
+    if n < 0:
+        return False
+    r = int(math.sqrt(n))
+    return r * r == n
 
 def fmt_ratio(num_kind, num_val, den, sign):
-
     if den == 0:
         return "undefined"
-    if sign < 0:
-        sign_str = "-"
-    else:
-        sign_str = ""
 
     if num_kind == "int":
         n = int(num_val)
         d = int(den)
 
         n, d = reduce_frac(n, d)
-
         n = n if sign > 0 else -n
 
         if d == 1:
             return str(n)
         return str(n) + "/" + str(d)
 
-
+    # sqrt form
     d = int(den)
-
+    sign_str = "-" if sign < 0 else ""
     if d == 1:
         return sign_str + "sqrt(" + str(int(num_val)) + ")"
     return sign_str + "sqrt(" + str(int(num_val)) + ")/" + str(d)
 
 def quad_signs(q):
-
     q = q.upper().strip()
-    if q == "Q1": return (+1, +1, +1)
+    if q == "Q1": return (+1, +1, +1)  # sin, cos, tan
     if q == "Q2": return (+1, -1, -1)
     if q == "Q3": return (-1, -1, +1)
     if q == "Q4": return (-1, +1, -1)
@@ -63,34 +56,40 @@ def quad_signs(q):
 
 def parse_input(s):
     s = s.strip().lower().replace(" ", "")
-
     if "(" not in s or ")" not in s:
         return None
+
     fn = s.split("(")[0]
-    inside = s[s.find("(")+1 : s.rfind(")")]
+    if fn not in ("sin", "cos", "tan"):
+        return None
+
+    inside = s[s.find("(") + 1 : s.rfind(")")]
     if "/" not in inside:
         return None
+
     a_str, b_str = inside.split("/", 1)
     try:
         a = int(a_str)
         b = int(b_str)
     except:
         return None
+
     if b == 0:
         return None
-    a, b = reduce_frac(a, b)
 
+    a, b = reduce_frac(a, b)
     return (fn, abs(a), abs(b))
 
 def build_triangle(fn, a, b):
-
+    # returns magnitudes (opp, adj, hyp) as (kind, val)
     if fn == "sin":
         opp = ("int", a)
         hyp = ("int", b)
         rad = b*b - a*a
-        if rad < 0: return None
+        if rad < 0:
+            return None
         if is_square(rad):
-            adj = ("int", int(math.isqrt(rad)))
+            adj = ("int", int(math.sqrt(rad)))
         else:
             adj = ("sqrt", rad)
         return (opp, adj, hyp)
@@ -99,9 +98,10 @@ def build_triangle(fn, a, b):
         adj = ("int", a)
         hyp = ("int", b)
         rad = b*b - a*a
-        if rad < 0: return None
+        if rad < 0:
+            return None
         if is_square(rad):
-            opp = ("int", int(math.isqrt(rad)))
+            opp = ("int", int(math.sqrt(rad)))
         else:
             opp = ("sqrt", rad)
         return (opp, adj, hyp)
@@ -111,111 +111,50 @@ def build_triangle(fn, a, b):
         adj = ("int", b)
         rad = a*a + b*b
         if is_square(rad):
-            hyp = ("int", int(math.isqrt(rad)))
-        else:
-            hyp = ("sqrt", rad)
-        return (opp, adj, hyp)
-
-    if fn == "csc":
-
-        hyp = ("int", a)
-        opp = ("int", b)
-        rad = a*a - b*b
-        if rad < 0: return None
-        if is_square(rad):
-            adj = ("int", int(math.isqrt(rad)))
-        else:
-            adj = ("sqrt", rad)
-        return (opp, adj, hyp)
-
-    if fn == "sec":
-
-        hyp = ("int", a)
-        adj = ("int", b)
-        rad = a*a - b*b
-        if rad < 0: return None
-        if is_square(rad):
-            opp = ("int", int(math.isqrt(rad)))
-        else:
-            opp = ("sqrt", rad)
-        return (opp, adj, hyp)
-
-    if fn == "cot":
-
-        adj = ("int", a)
-        opp = ("int", b)
-        rad = a*a + b*b
-        if is_square(rad):
-            hyp = ("int", int(math.isqrt(rad)))
+            hyp = ("int", int(math.sqrt(rad)))
         else:
             hyp = ("sqrt", rad)
         return (opp, adj, hyp)
 
     return None
 
-
 def trig_values(opp, adj, hyp, q):
     ss, cs, ts = quad_signs(q)
-
 
     ok, ov = opp
     ak, av = adj
     hk, hv = hyp
 
+    # sin = opp/hyp
+    sin_s = fmt_ratio(ok, ov, hv if hk == "int" else 1, ss) if hk == "int" else (
+        ("-" if ss < 0 else "") + str(ov) + "/sqrt(" + str(hv) + ")"
+    )
 
+    # cos = adj/hyp
+    cos_s = fmt_ratio(ak, av, hv if hk == "int" else 1, cs) if hk == "int" else (
+        ("-" if cs < 0 else "") + str(av) + "/sqrt(" + str(hv) + ")"
+    )
 
-
-    sin_s = fmt_ratio(ok, ov, hv if hk=="int" else 1, ss) if hk=="int" else (("-" if ss<0 else "") + str(ov) + "/sqrt(" + str(hv) + ")")
-
-    cos_s = fmt_ratio(ak, av, hv if hk=="int" else 1, cs) if hk=="int" else (("-" if cs<0 else "") + str(av) + "/sqrt(" + str(hv) + ")")
-
-
+    # tan = opp/adj
     if ak == "int":
         tan_s = fmt_ratio(ok, ov, av, ts)
     else:
-        tan_s = ("-" if ts<0 else "") + str(ov) + "/sqrt(" + str(av) + ")"
+        tan_s = ("-" if ts < 0 else "") + str(ov) + "/sqrt(" + str(av) + ")"
 
+    return {"sin": sin_s, "cos": cos_s, "tan": tan_s}
 
-    if ok == "int":
-        csc_s = fmt_ratio(hk, hv, ov, ss) if hk=="int" else (("-" if ss<0 else "") + "sqrt(" + str(hv) + ")/" + str(ov))
-    else:
-
-        csc_s = ("-" if ss<0 else "") + str(hv) + "/sqrt(" + str(ov) + ")"
-
-
-    if ak == "int":
-        sec_s = fmt_ratio(hk, hv, av, cs) if hk=="int" else (("-" if cs<0 else "") + "sqrt(" + str(hv) + ")/" + str(av))
-    else:
-        sec_s = ("-" if cs<0 else "") + str(hv) + "/sqrt(" + str(av) + ")"
-
-
-    if ok == "int":
-        if ak == "int":
-            cot_s = fmt_ratio("int", av, ov, ts)
-        else:
-            cot_s = ("-" if ts<0 else "") + "sqrt(" + str(av) + ")/" + str(ov)
-    else:
-        cot_s = ("-" if ts<0 else "") + str(av) + "/sqrt(" + str(ov) + ")"
-
-    return {
-        "sin": sin_s,
-        "cos": cos_s,
-        "tan": tan_s,
-        "csc": csc_s,
-        "sec": sec_s,
-        "cot": cot_s
-    }
-
-
+# ----------------------------
+# Main loop
+# ----------------------------
 while True:
-    print("\n=== TRIG FROM FRACTION ===")
+    print("\n=== TRIG FROM FRACTION (sin/cos/tan only) ===")
     s = input("Input (e.g. sin(4/5)) or QUIT: ").strip()
     if s.upper() == "QUIT":
         break
 
     parsed = parse_input(s)
     if parsed is None:
-        print("Bad input format. Use like: sin(4/5)")
+        print("Bad input. Use sin(4/5), cos(3/5), or tan(4/3).")
         continue
 
     fn, a, b = parsed
@@ -232,13 +171,8 @@ while True:
     opp, adj, hyp = tri
     vals = trig_values(opp, adj, hyp, q)
 
-
     print("1.) sin(theta) =", vals["sin"])
     print("2.) cos(theta) =", vals["cos"])
     print("3.) tan(theta) =", vals["tan"])
-    print("4.) cot(theta) =", vals["cot"])
-    print("5.) csc(theta) =", vals["csc"])
-    print("6.) sec(theta) =", vals["sec"])
 
     input("Enter to continue")
-
