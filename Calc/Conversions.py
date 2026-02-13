@@ -320,7 +320,7 @@ def main():
                 raise ValueError("Angle must be a multiple of pi/12 (like pi/6, 5pi/4, 7pi/12, etc).")
 
             pi_mult_norm = normalize_angle_pi(pi_mult)
-            deg = pi_fraction_to_degrees(pi_mult_norm)  # exact integer degrees
+            deg = pi_fraction_to_degrees(pi_mult_norm)  # integer ->     degrees
             val = trig_all(func, deg)
 
             print(f"{func}({pi_frac_str(pi_mult)}) = {val}")
