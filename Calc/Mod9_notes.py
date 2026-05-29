@@ -100,58 +100,86 @@ while quit == False:
         input("")
 
     elif selection ==6:
-        print("Solve for Theta: ")
-        print("\nUnit Circle (Exact π Form)")
-        expr = input("Enter (ex: cos(sqrt(3)/2)): ").strip().lower()
+        print("Solve for Theta:\nTan(2_theta)=B/(A-C)")
+        input("")
+        print("input theta into\nX=x cos(the)-y sin(the)\nY=x sin(the)-y cos(the)")
+        input("")
+        # EXACT_TRIG_VALUES — TI-84 Python safe
 
-        if len(expr) < 6 or "(" not in expr or not expr.endswith(")"):
-            print("Bad format. Use like: sin(1/2) or cos(sqrt(3)/2)")
-            continue
+    # Exact-value lookup table
+    # Format: angle : (sin, cos, tan)
+    EXACT = {
+        0:   ("0", "1", "0"),
+        30:  ("1/2", "sqrt(3)/2", "sqrt(3)/3"),
+        45:  ("sqrt(2)/2", "sqrt(2)/2", "1"),
+        60:  ("sqrt(3)/2", "1/2", "sqrt(3)"),
+        90:  ("1", "0", "undefined"),
 
-        func = expr[:3]
-        inside = expr[4:-1]
+        120: ("sqrt(3)/2", "-1/2", "-sqrt(3)"),
+        135: ("sqrt(2)/2", "-sqrt(2)/2", "-1"),
+        150: ("1/2", "-sqrt(3)/2", "-sqrt(3)/3"),
+        180: ("0", "-1", "0"),
 
+        210: ("-1/2", "-sqrt(3)/2", "sqrt(3)/3"),
+        225: ("-sqrt(2)/2", "-sqrt(2)/2", "1"),
+        240: ("-sqrt(3)/2", "-1/2", "sqrt(3)"),
+        270: ("-1", "0", "undefined"),
+
+        300: ("-sqrt(3)/2", "1/2", "-sqrt(3)"),
+        315: ("-sqrt(2)/2", "sqrt(2)/2", "-1"),
+        330: ("-1/2", "sqrt(3)/2", "-sqrt(3)/3"),
+        360: ("0", "1", "0")
+    }
+
+    def parse_input(s):
+        s = s.strip().lower().replace(" ", "")
+        if "(" not in s or ")" not in s:
+            return None
+
+        fn = s.split("(")[0]
+        if fn not in ("sin", "cos", "tan"):
+            return None
+
+        inside = s[s.find("(")+1:s.rfind(")")]
         try:
-            value = safe_eval(inside)
+            angle = int(inside)
         except:
-            print("Couldn't read the value. Use numbers, /, pi, and sqrt(x).")
-            continue
+            return None
 
-        angles = []
+        angle %= 360
+        return fn, angle
 
-        if func == "sin":
-            if value < -1 or value > 1:
-                print("No real solutions (|value| must be <= 1).")
-                continue
-            a = math.asin(value)
-            angles = [a, math.pi - a]
+    # ----------------------------
+    # Main loop
+    # ----------------------------
 
-        elif func == "cos":
-            if value < -1 or value > 1:
-                print("No real solutions (|value| must be <= 1).")
-                continue
-            a = math.acos(value)
-            angles = [a, TWOPI - a]
+    print("\n=== EXACT TRIG VALUES ===")
+    s = input("Input (e.g. cos(30)) or QUIT: ").strip()
+    if s.upper() == "QUIT":
+        break
 
-        elif func == "tan":
-            a = math.atan(value)
-            angles = [a, a + math.pi]
+    parsed = parse_input(s)
+    if parsed is None:
+        print("Bad input. Use sin(30), cos(45), tan(60), etc.")
+        continue
 
-        else:
-            print("Invalid trig function. Use sin, cos, or tan.")
-            continue
+    fn, angle = parsed
 
-        cleaned = unique_angles(angles)
+    if angle not in EXACT:
+        print("No exact value for this angle.")
+        continue
 
-        print("\nResults:")
-        for t in cleaned:
-            x = round(math.cos(t), 3)
-            y = round(math.sin(t), 3)
-            print("θ =", pi_fraction(t), "Point:", (x, y))
+    sin_v, cos_v, tan_v = EXACT[angle]
 
-        again = input("Continue? (y/n): ").strip().lower()
-        if again != "y":
-            break
+    if fn == "sin":
+        print(sin_v)
+    elif fn == "cos":
+        print(cos_v)
     else:
-        print("incorrect selection")
+        print(tan_v)
+
+    input("Enter to continue")
+    print("plug back into main function")
+else:
+    print("incorrect selection")
 
